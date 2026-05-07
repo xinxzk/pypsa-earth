@@ -1,0 +1,21 @@
+# 忽略所有生成的图片、数据和日志
+*.png
+*.csv
+*.nc
+*.h5
+*.log
+
+# 忽略结果输出和缓存文件夹
+results/
+res/
+comprehensive_results/
+analysis_*/
+chat/
+topopic/
+
+# 如果有 Python 缓存也忽略
+__pycache__/
+*.pyc
+
+# 白名单防误杀：如果有 README 里的说明图片可以单独强制取消忽略
+# !showcase.png
