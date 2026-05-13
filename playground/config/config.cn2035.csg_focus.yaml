@@ -1,0 +1,425 @@
+# PyPSA-Earth China Power Test Config
+# CSG-focused clustering workflow:
+#   CSG 40, Northeast 1, North China 2, East China 2,
+#   Central China outside CSG 2, Northwest 2, Tibet/Xinjiang 2.
+#   Total is 51 because AC and DC buses must be clustered separately.
+
+version: 0.8.0
+tutorial: false
+
+logging:
+  level: INFO
+  format: "%(levelname)s:%(name)s:%(message)s"
+
+results_dir: results/
+summary_dir: results/
+foresight: overnight
+
+countries: ["CN"]
+
+enable:
+  retrieve_databundle: false
+  retrieve_databundle_sector: false # 纯电力不需要 sector databundle
+  retrieve_cost_data: false
+  retrieve_cutout: false
+  download_osm_data: true
+  download_global_buildings: false
+  build_natura_raster: false
+  build_cutout: false # 第一次跑如果报错缺失气象，改为 true
+  progress_bar: true
+  custom_busmap: true
+
+custom_rules:
+  - playground/workflows/csg_focus.smk
+
+run:
+  name: "CN_power_2035_ssp226_CSG50"
+  sector_name: ""
+  shared_cutouts: true
+  allow_scenario_failure: false
+
+scenario:
+  simpl: [""]
+  ll: ["copt"]
+  clusters: [51]
+  opts: [Co2L-1h]
+  planning_horizons:
+    - 2035
+  sopts:
+    - "144h"
+  demand:
+    - "AB"
+
+# 3. 时间跨度改为 1 个月
+snapshots:
+  start: "2013-01-01"
+  end: "2013-12-31"
+  inclusive: "left"
+
+crs:
+  geo_crs: EPSG:4326
+  distance_crs: EPSG:3857
+  area_crs: ESRI:54009
+
+natura:
+  natura_size: countries
+  natura_resolution: 100
+  window_size: 10000
+  buffer_size: 10000
+
+augmented_line_connection:
+  add_to_snakefile: false
+  connectivity_upgrade: 2
+  new_line_type: ["HVAC"]
+  min_expansion: 1
+  min_DC_length: 600
+
+cluster_options:
+  simplify_network:
+    to_substations: false
+    algorithm: kmeans
+    feature: solar+onwind-time
+    exclude_carriers: []
+    remove_stubs: true
+    remove_stubs_across_borders: false
+    p_threshold_drop_isolated: 20
+    p_threshold_merge_isolated: 300
+    s_threshold_fetch_isolated: 0.5
+  cluster_network:
+    algorithm: kmeans
+    feature: solar+onwind-time
+    exclude_carriers: []
+  alternative_clustering: false
+  distribute_cluster: ["load"]
+  out_logging: true
+  aggregation_strategies:
+    generators:
+      p_nom: sum
+      p_nom_max: sum
+      p_nom_min: sum
+      p_min_pu: mean
+      p_max_pu: weighted_average
+      marginal_cost: mean
+      committable: any
+      ramp_limit_up: max
+      ramp_limit_down: max
+      efficiency: mean
+  focus_weights: false
+
+build_shape_options:
+  gadm_layer_id: 1
+  simplify_tolerance: 0.01
+  simplify_gadm: true
+  minarea: 0.01
+  update_file: false
+  out_logging: true
+  year: 2020
+  nprocesses: 16
+  worldpop_method: "standard"
+  gdp_method: "standard"
+  contended_flag: "set_by_country"
+
+subregion:
+  enable:
+    simplify_network: true
+    cluster_network: false
+  define_by_gadm:
+    CN: ["all"]
+  gadm_layer_id: 1
+  path_custom_shapes: false
+  tolerance: 100
+
+clean_osm_data_options:
+  names_by_shapes: true
+  threshold_voltage: 51000
+  tag_substation: "transmission"
+  add_line_endings: true
+  generator_name_method: OSM
+  use_custom_lines: "OSM_only"
+  path_custom_lines: false
+  use_custom_substations: "OSM_only"
+  path_custom_substations: false
+  use_custom_cables: "OSM_only"
+  path_custom_cables: false
+
+build_osm_network:
+  group_close_buses: true
+  group_tolerance_buses: 5000
+  split_overpassing_lines: true
+  overpassing_lines_tolerance: 1
+  force_ac: false
+
+base_network:
+  min_voltage_substation_offshore: 51000
+  min_voltage_rebase_voltage: 51000
+
+load_options:
+  ssp: "ssp2-2.6"
+  weather_year: 2013
+  prediction_year: 2030
+  scale: 1.25
+
+co2_budget:
+  enable: false
+  override_co2opt: true
+  co2base_value: co2limit
+  year:
+    2035: 0.60
+
+electricity:
+  base_voltage: 380.
+  voltages: [132., 220., 300., 380., 500., 750.]
+  co2limit: 7.75e+7
+  co2base: 1.487e+9
+  agg_p_nom_limits:
+    file: data/agg_p_nom_minmax.csv
+    include_existing: false
+  hvdc_as_lines: false
+  automatic_emission: false
+  automatic_emission_base_year: 1990
+  operational_reserve:
+    activate: false
+    epsilon_load: 0.02
+    epsilon_vres: 0.02
+    contingency: 0
+  max_hours:
+    battery: 6
+    H2: 168
+  extendable_carriers:
+    Generator: [solar, onwind, offwind-ac, offwind-dc, OCGT]
+    StorageUnit: []
+    Store: [battery, H2]
+    Link: []
+  powerplants_filter: (DateOut >= 2022 or DateOut != DateOut) and (DateIn <= 2023 or DateIn != DateIn)
+  custom_powerplants: false
+  conventional_carriers:
+    [nuclear, oil, OCGT, CCGT, coal, lignite, geothermal, biomass]
+  renewable_carriers: [solar, onwind, offwind-ac, offwind-dc, hydro]
+  estimate_renewable_capacities:
+    stats: "irena"
+    year: 2023
+    p_nom_min: 1
+    p_nom_max: false
+    technology_mapping:
+      Offshore: [offwind-ac, offwind-dc]
+      Onshore: [onwind]
+      PV: [solar]
+
+# todo 需要修改成中国区域对应的线路参数
+lines:
+  ac_types:
+    132.: "243-AL1/39-ST1A 20.0"
+    220.: "Al/St 240/40 2-bundle 220.0"
+    300.: "Al/St 240/40 3-bundle 300.0"
+    380.: "Al/St 240/40 4-bundle 380.0"
+    500.: "Al/St 240/40 4-bundle 380.0"
+    750.: "Al/St 560/50 4-bundle 750.0"
+  dc_types:
+    500.: "HVDC XLPE 1000"
+  s_max_pu: 0.7
+  s_nom_max: .inf
+  s_nom_max_min: -.inf
+  max_extension: 20000
+  s_nom_extendable_limit: 1.5 # （有些PyPSA版本支持使用倍数限制扩容，但我们换一种更稳妥的思路）
+  length_factor: 1.25
+  under_construction: "zero"
+
+links:
+  p_max_pu: 1.0
+  p_nom_max: .inf
+  p_nom_max_min: -.inf
+  max_extension: 20000
+  under_construction: "zero"
+
+transformers:
+  x: 0.1
+  s_nom: 2000.
+  type: ""
+
+atlite:
+  nprocesses: 16
+  cutouts:
+    cutout-2013-era5:
+      module: era5
+      # 4. 略微降低分辨率，成倍减少气象数据体积
+      dx: 0.5
+      dy: 0.5
+
+renewable:
+  onwind:
+    cutout: cutout-2013-era5
+    resource:
+      method: wind
+      turbine: Vestas_V112_3MW
+    capacity_per_sqkm: 3
+    copernicus:
+      grid_codes:
+        [
+          20,
+          30,
+          40,
+          60,
+          100,
+          111,
+          112,
+          113,
+          114,
+          115,
+          116,
+          121,
+          122,
+          123,
+          124,
+          125,
+          126,
+        ]
+      distance: 1000
+      distance_grid_codes: [50]
+    natura: true
+    potential: simple
+    clip_p_max_pu: 1.e-2
+    extendable: true
+  offwind-ac:
+    cutout: cutout-2013-era5
+    resource:
+      method: wind
+      turbine: NREL_ReferenceTurbine_5MW_offshore
+    capacity_per_sqkm: 2
+    copernicus:
+      grid_codes: [80, 200]
+    natura: true
+    max_depth: 50
+    max_shore_distance: 30000
+    potential: simple
+    clip_p_max_pu: 1.e-2
+    extendable: true
+  offwind-dc:
+    cutout: cutout-2013-era5
+    resource:
+      method: wind
+      turbine: NREL_ReferenceTurbine_5MW_offshore
+    capacity_per_sqkm: 3
+    copernicus:
+      grid_codes: [80, 200]
+    natura: true
+    max_depth: 50
+    min_shore_distance: 30000
+    potential: simple
+    clip_p_max_pu: 1.e-2
+    extendable: true
+  solar:
+    cutout: cutout-2013-era5
+    resource:
+      method: pv
+      panel: CSi
+      orientation: latitude_optimal
+    capacity_per_sqkm: 4.6
+    correction_factor: 0.854337
+    copernicus:
+      grid_codes: [20, 30, 40, 50, 60, 90, 100]
+    natura: true
+    potential: simple
+    clip_p_max_pu: 1.e-2
+    extendable: true
+  hydro:
+    cutout: cutout-2013-era5
+    hydrobasins_level: 6
+    resource:
+      method: hydro
+      hydrobasins: data/hydrobasins/hybas_world.shp
+      flowspeed: 1.0
+    carriers: [ror, PHS, hydro]
+    PHS_max_hours: 6
+    hydro_max_hours: "energy_capacity_totals_by_country"
+    hydro_max_hours_default: 6.0
+    clip_min_inflow: 1.0
+    extendable: true
+    normalization:
+      method: eia
+      year: 2013
+    multiplier: 1.1
+
+costs:
+  year: 2035
+  technology_data_version: v0.13.2
+  discountrate: [0.071]
+  country_specific_data: ""
+  output_currency: "EUR"
+  default_exchange_rate: 0.7532
+  future_exchange_rate_strategy: "reference"
+  rooftop_share: 0.14
+  fill_values:
+    FOM: 0
+    VOM: 0
+    efficiency: 1
+    fuel: 0
+    investment: 0
+    lifetime: 25
+    CO2 intensity: 0
+    discount rate: 0.07
+  marginal_cost:
+    solar: 0.01
+    onwind: 0.015
+    offwind: 0.015
+    hydro: 0.
+    H2: 0.
+    electrolysis: 0.
+    fuel cell: 0.
+    battery: 0.
+    battery inverter: 0.
+  emission_prices:
+    co2: 0.
+  lines:
+    length_factor: 1.25
+
+monte_carlo:
+  options:
+    add_to_snakefile: false
+
+# ------------------- SECTOR OPTIONS -------------------
+# 5. 纯电力测试，强制关闭所有周边行业网络
+sector:
+  enable:
+    heat: false
+    biomass: false
+    industry: false
+    shipping: false
+    aviation: false
+    land_transport: false
+    rail_transport: false
+    agriculture: false
+    residential: false
+    services: false
+
+solving:
+  options:
+    formulation: kirchhoff
+    load_shedding: 10000 
+    noisy_costs: true
+    min_iterations: 4
+    max_iterations: 6
+    clip_p_max_pu: 0.01
+    skip_iterations: true
+    track_iterations: false
+
+  solver:
+    name: gurobi 
+    options: gurobi-default
+
+  solver_options:
+    gurobi-default:
+      threads: 32
+      method: 2
+      crossover: 0
+      BarConvTol: 1.e-3
+      Seed: 123
+      AggFill: 0
+      PreDual: 0
+      GURO_PAR_BARDENSETHRESH: 200
+
+  mem: 40000
+
+plotting:
+  map:
+    figsize: [7, 7]
+    boundaries: [73, 135, 18, 54] # 替换为中国的大致经纬度边界
