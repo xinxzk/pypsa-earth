@@ -235,6 +235,8 @@ electricity:
       PV: [solar]
 
 lines:
+  line_types_file: false # Optional path to a YAML file with custom PyPSA line type definitions
+  line_types: {} # Optional custom PyPSA line type definitions keyed by line type name
   ac_types:
     132.: "243-AL1/39-ST1A 20.0"
     220.: "Al/St 240/40 2-bundle 220.0"

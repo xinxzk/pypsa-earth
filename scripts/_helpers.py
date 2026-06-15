@@ -50,6 +50,64 @@ BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
 CONFIG_DEFAULT_PATH = os.path.join(BASE_DIR, "config.default.yaml")
 
 
+def apply_configured_line_types(n, lines_config):
+    """
+    Add line type definitions from the workflow config to a PyPSA network.
+
+    PyPSA-Earth's ``lines.ac_types`` and ``lines.dc_types`` map voltage levels
+    to names in ``n.line_types``. This helper lets scenario configs define
+    additional project-specific line types without editing the installed PyPSA
+    standard type table.
+    """
+    configured = {}
+    line_types_file = lines_config.get("line_types_file")
+    if line_types_file:
+        path = Path(line_types_file)
+        if not path.is_absolute():
+            path = Path(BASE_DIR) / path
+        with open(path, "r") as f:
+            loaded = yaml.safe_load(f) or {}
+        configured.update(loaded.get("line_types", loaded))
+
+    configured.update(lines_config.get("line_types", {}))
+    if not configured:
+        return
+
+    line_types = pd.DataFrame.from_dict(configured, orient="index")
+    required = ["f_nom", "r_per_length", "x_per_length", "c_per_length", "i_nom"]
+    missing = [col for col in required if col not in line_types.columns]
+    if missing:
+        raise ValueError(
+            "Configured line types are missing required columns: "
+            + ", ".join(missing)
+        )
+
+    pypsa_columns = [
+        "f_nom",
+        "r_per_length",
+        "x_per_length",
+        "c_per_length",
+        "i_nom",
+        "mounting",
+        "cross_section",
+        "references",
+    ]
+    line_types = line_types.copy()
+    line_types["mounting"] = line_types.get("mounting", "ol")
+    line_types["cross_section"] = line_types.get("cross_section", np.nan)
+    line_types["references"] = line_types.get("references", "configured in lines.line_types")
+    line_types = line_types.reindex(columns=pypsa_columns)
+
+    for col in ["f_nom", "r_per_length", "x_per_length", "c_per_length", "i_nom", "cross_section"]:
+        line_types[col] = pd.to_numeric(line_types[col], errors="raise")
+
+    n.line_types = pd.concat(
+        [n.line_types.drop(index=line_types.index, errors="ignore"), line_types],
+        axis=0,
+    )
+    logger.info("Added %s configured line type(s)", len(line_types))
+
+
 def check_config_version(config, fp_config=CONFIG_DEFAULT_PATH):
     """
     Check that a version of the local config.yaml matches to the actual config

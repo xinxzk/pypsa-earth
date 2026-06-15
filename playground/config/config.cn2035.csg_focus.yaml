@@ -131,7 +131,7 @@ subregion:
 
 clean_osm_data_options:
   names_by_shapes: true
-  threshold_voltage: 51000
+  threshold_voltage: 220000
   tag_substation: "transmission"
   add_line_endings: true
   generator_name_method: OSM
@@ -150,8 +150,8 @@ build_osm_network:
   force_ac: false
 
 base_network:
-  min_voltage_substation_offshore: 51000
-  min_voltage_rebase_voltage: 51000
+  min_voltage_substation_offshore: 220000
+  min_voltage_rebase_voltage: 220000
 
 load_options:
   ssp: "ssp2-2.6"
@@ -167,8 +167,8 @@ co2_budget:
     2035: 0.60
 
 electricity:
-  base_voltage: 380.
-  voltages: [132., 220., 300., 380., 500., 750.]
+  base_voltage: 500.
+  voltages: [220., 330., 500., 660., 750., 800., 1000., 1100.]
   co2limit: 7.75e+7
   co2base: 1.487e+9
   agg_p_nom_limits:
@@ -205,17 +205,19 @@ electricity:
       Onshore: [onwind]
       PV: [solar]
 
-# todo 需要修改成中国区域对应的线路参数
 lines:
+  line_types_file: playground/config/china_line_types.yaml
   ac_types:
-    132.: "243-AL1/39-ST1A 20.0"
-    220.: "Al/St 240/40 2-bundle 220.0"
-    300.: "Al/St 240/40 3-bundle 300.0"
-    380.: "Al/St 240/40 4-bundle 380.0"
-    500.: "Al/St 240/40 4-bundle 380.0"
-    750.: "Al/St 560/50 4-bundle 750.0"
+    220.: "CN_AC_220kV_single"
+    330.: "CN_AC_330kV_single"
+    500.: "CN_AC_500kV_single"
+    750.: "CN_AC_750kV_single"
+    1000.: "CN_AC_1000kV_single"
   dc_types:
-    500.: "HVDC XLPE 1000"
+    500.: "CN_HVDC_500kV_3000MW"
+    660.: "CN_HVDC_660kV_4000MW"
+    800.: "CN_HVDC_800kV_8000MW"
+    1100.: "CN_HVDC_1100kV_12000MW"
   s_max_pu: 0.7
   s_nom_max: .inf
   s_nom_max_min: -.inf

@@ -87,6 +87,7 @@ import pypsa
 import scipy as sp
 from _helpers import (
     add_year_suffix_to_carriers,
+    apply_configured_line_types,
     configure_logging,
     create_logger,
     nearest_shape,
@@ -1045,6 +1046,7 @@ if __name__ == "__main__":
     configure_logging(snakemake)
 
     n = pypsa.Network(snakemake.input.network)
+    apply_configured_line_types(n, snakemake.params.config_lines)
 
     # Add year suffix to carrier names for clustering
     add_year_suffix_to_carriers(n)

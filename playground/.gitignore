@@ -10,6 +10,8 @@ results/
 res/
 comprehensive_results/
 analysis_*/
+!analysis_scripts/
+!analysis_scripts/*.py
 chat/
 topopic/
 

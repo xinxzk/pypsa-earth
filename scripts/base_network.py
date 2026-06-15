@@ -65,7 +65,12 @@ import pypsa
 import scipy as sp
 import shapely.prepared
 import shapely.wkt
-from _helpers import configure_logging, create_logger, read_csv_nafix
+from _helpers import (
+    apply_configured_line_types,
+    configure_logging,
+    create_logger,
+    read_csv_nafix,
+)
 from shapely.ops import unary_union
 
 logger = create_logger(__name__)
@@ -504,6 +509,7 @@ def base_network(
 
     n = pypsa.Network()
     n.name = "PyPSA-Earth"
+    apply_configured_line_types(n, lines_config)
 
     n.set_snapshots(pd.date_range(freq="h", **snapshots_config))
     n.snapshot_weightings[:] *= 8760.0 / n.snapshot_weightings.sum()

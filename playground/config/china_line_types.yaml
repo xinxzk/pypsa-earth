@@ -1,0 +1,144 @@
+line_types:
+  CN_AC_220kV_single:
+    quality: "! partly sourced; current rating provisional"
+    todo: "TODO: replace current rating with citable China 220 kV overhead line source."
+    f_nom: 50.
+    r_per_length: 0.059
+    x_per_length: 0.285
+    c_per_length: 10.0
+    i_nom: 1.57
+    mounting: ol
+    cross_section: 490.
+    references: "Resistance/reactance/capacitance follow PyPSA/pandapower 490-AL1/64-ST1A 220 kV standard type; current rating adjusted upward as a temporary China backbone planning assumption."
+    source:
+      status: mixed
+      url_or_doi: "https://raw.githubusercontent.com/PyPSA/PyPSA/master/pypsa/data/standard_types/line_types.csv"
+      institution: "PyPSA standard line types / pandapower; current rating is provisional."
+
+  CN_AC_330kV_single:
+    quality: "! partly sourced; extrapolated to China 330 kV"
+    todo: "TODO: replace with citable China 330 kV overhead line parameter source."
+    f_nom: 50.
+    r_per_length: 0.04
+    x_per_length: 0.265
+    c_per_length: 13.2
+    i_nom: 2.10
+    mounting: ol
+    cross_section: 400.
+    references: "Resistance/reactance/capacitance follow PyPSA Al/St 240/40 3-bundle 300 kV standard type as a nearest-voltage proxy; current rating adjusted to a 330 kV backbone planning value."
+    source:
+      status: mixed
+      url_or_doi: "https://raw.githubusercontent.com/PyPSA/PyPSA/master/pypsa/data/standard_types/line_types.csv"
+      institution: "PyPSA standard line types, citing Oeding and Oswald, Elektrische Kraftwerke und Netze, 2011, Chapter 9."
+
+  CN_AC_500kV_single:
+    quality: "! provisional"
+    todo: "TODO: replace with citable China 500 kV overhead line parameter source."
+    f_nom: 50.
+    r_per_length: 0.02
+    x_per_length: 0.28
+    c_per_length: 13.5
+    i_nom: 3.50
+    mounting: ol
+    cross_section: 400.
+    references: "Provisional China 500 kV planning value. Parameter magnitude checked against PyPSA 380 kV/750 kV overhead standard types; not publication-grade."
+    source:
+      status: provisional
+      url_or_doi: "https://raw.githubusercontent.com/PyPSA/PyPSA/master/pypsa/data/standard_types/line_types.csv"
+      institution: "PyPSA standard line types used as engineering proxy; China-specific 500 kV source still required."
+
+  CN_AC_750kV_single:
+    quality: "! partly sourced; China-specific validation pending"
+    todo: "TODO: replace or validate with citable China 750 kV overhead line parameter source."
+    f_nom: 50.
+    r_per_length: 0.013
+    x_per_length: 0.276
+    c_per_length: 13.13
+    i_nom: 4.20
+    mounting: ol
+    cross_section: 560.
+    references: "Electrical parameters follow PyPSA Al/St 560/50 4-bundle 750 kV standard type; replace or validate with China-specific source before publication use."
+    source:
+      status: mixed
+      url_or_doi: "https://raw.githubusercontent.com/PyPSA/PyPSA/master/pypsa/data/standard_types/line_types.csv"
+      institution: "PyPSA standard line types, citing Oeding and Oswald, Elektrische Kraftwerke und Netze, 2011, Appendix."
+
+  CN_AC_1000kV_single:
+    quality: "! partly sourced; electrical parameters extrapolated"
+    todo: "TODO: replace r/x/c with citable China 1000 kV UHV AC overhead line parameter source."
+    f_nom: 50.
+    r_per_length: 0.008
+    x_per_length: 0.27
+    c_per_length: 13.0
+    i_nom: 4.60
+    mounting: ol
+    cross_section: 630.
+    references: "China 1000 kV UHV AC voltage and multi-GW project scale are sourced from China UHV project lists; r/x/c are provisional extrapolations from EHV/UHV overhead-line ranges."
+    source:
+      status: mixed
+      url_or_doi: "https://en.wikipedia.org/wiki/Ultra-high-voltage_electricity_transmission_in_China"
+      institution: "China UHV project list for 1000 kV AC project voltage/rating; electrical parameters remain provisional."
+
+  CN_HVDC_500kV_3000MW:
+    quality: "! provisional"
+    todo: "TODO: replace with citable China +/-500 kV HVDC line electrical parameter and rating source."
+    f_nom: 0.
+    r_per_length: 0.01
+    x_per_length: 0.000001
+    c_per_length: 10000.
+    i_nom: 6.00
+    mounting: ol
+    cross_section: 0.
+    references: "Provisional planning value. China has +/-500 kV HVDC projects, but the 3000 MW rating and electrical parameters remain planning assumptions."
+    source:
+      status: provisional
+      url_or_doi: "https://en.wikipedia.org/wiki/HVDC_Tian%E2%80%93Guang"
+      institution: "Tian-Guang HVDC page documents a China +/-500 kV HVDC project; rating differs from this planning assumption."
+
+  CN_HVDC_660kV_4000MW:
+    quality: "! partly sourced; electrical parameters provisional"
+    todo: "TODO: replace r/x/c with citable China +/-660 kV HVDC line electrical parameter source."
+    f_nom: 0.
+    r_per_length: 0.008
+    x_per_length: 0.000001
+    c_per_length: 10000.
+    i_nom: 6.10
+    mounting: ol
+    cross_section: 0.
+    references: "Voltage/rating aligned to +/-660 kV, 4000 MW HVDC projects such as Ningdong-Shandong; r/x/c remain provisional planning values."
+    source:
+      status: mixed
+      url_or_doi: "https://en.wikipedia.org/wiki/List_of_HVDC_projects"
+      institution: "HVDC project list documents Ningdong-Shandong as 660 kV, 4000 MW."
+
+  CN_HVDC_800kV_8000MW:
+    quality: "! partly sourced; electrical parameters provisional"
+    todo: "TODO: replace r/x/c with citable China +/-800 kV HVDC line electrical parameter source."
+    f_nom: 0.
+    r_per_length: 0.006
+    x_per_length: 0.000001
+    c_per_length: 10000.
+    i_nom: 10.00
+    mounting: ol
+    cross_section: 0.
+    references: "Voltage/rating aligned to common China +/-800 kV 8 GW UHVDC projects such as Hami-Zhengzhou and Xiluodu-Zhejiang West; r/x/c remain provisional planning values."
+    source:
+      status: mixed
+      url_or_doi: "https://en.wikipedia.org/wiki/Ultra-high-voltage_electricity_transmission_in_China"
+      institution: "Project list documents multiple +/-800 kV China UHVDC schemes with 8 GW ratings."
+
+  CN_HVDC_1100kV_12000MW:
+    quality: "! partly sourced; electrical parameters provisional"
+    todo: "TODO: replace r/x/c with citable China +/-1100 kV HVDC line electrical parameter source."
+    f_nom: 0.
+    r_per_length: 0.004
+    x_per_length: 0.000001
+    c_per_length: 10000.
+    i_nom: 10.90
+    mounting: ol
+    cross_section: 0.
+    references: "Voltage/rating aligned to China's Zhundong-South Anhui / Zhundong-Wannan +/-1100 kV, 12 GW UHVDC project; r/x/c remain provisional planning values."
+    source:
+      status: mixed
+      url_or_doi: "https://en.wikipedia.org/wiki/High-voltage_direct_current"
+      institution: "HVDC overview documents Zhundong-Wannan as 1100 kV, 3400 km, 12 GW."
